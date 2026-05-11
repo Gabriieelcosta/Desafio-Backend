@@ -2,12 +2,14 @@ package com.solicitations.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table(
     name = "analyst_coverage",
