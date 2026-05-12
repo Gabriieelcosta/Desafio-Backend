@@ -10,6 +10,8 @@ import com.solicitations.dto.solicitation.Step2Request;
 import com.solicitations.dto.solicitation.Step3Request;
 import com.solicitations.exception.BusinessException;
 import com.solicitations.exception.NotFoundException;
+import com.solicitations.integration.viacep.ViaCepClient;
+import com.solicitations.integration.viacep.ViaCepResponse;
 import com.solicitations.repository.SolicitationRepository;
 import com.solicitations.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class SolicitationService {
 
     private final SolicitationRepository solicitationRepository;
     private final UserRepository userRepository;
+    private final ViaCepClient viaCepClient;
 
     public SolicitationResponse create(Long clientId) {
         User client = userRepository.findById(clientId)
@@ -60,9 +63,20 @@ public class SolicitationService {
         }
 
         String normalizedCep = request.getCep().replaceAll("[^0-9]", "");
+
+        ViaCepResponse address = viaCepClient.fetch(normalizedCep);
+
         solicitation.setCep(normalizedCep);
         solicitation.setNumber(request.getNumber());
         solicitation.setComplement(request.getComplement());
+        solicitation.setStreet(address.getStreet());
+        solicitation.setNeighborhood(address.getNeighborhood());
+        solicitation.setCity(address.getCity());
+        solicitation.setState(address.getState());
+
+        if (solicitation.getCurrentStep() < 2) {
+            solicitation.setCurrentStep(2);
+        }
 
         return SolicitationResponse.from(solicitationRepository.save(solicitation));
     }
