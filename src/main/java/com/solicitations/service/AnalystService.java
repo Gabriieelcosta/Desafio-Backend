@@ -13,6 +13,7 @@ import com.solicitations.repository.SolicitationRepository;
 import com.solicitations.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +25,7 @@ public class AnalystService {
     private final SolicitationRepository solicitationRepository;
     private final AnalystCoverageRepository analystCoverageRepository;
     private final UserRepository userRepository;
+    private final ElasticsearchIndexService elasticsearchIndexService;
 
     public SolicitationResponse getById(Long id, Long analystId) {
         Solicitation solicitation = findWithinCoverage(id, analystId);
@@ -47,7 +49,9 @@ public class AnalystService {
         }
 
         solicitation.setStatus(SolicitationStatus.IN_REVIEW);
-        return SolicitationResponse.from(solicitationRepository.save(solicitation));
+        Solicitation saved = solicitationRepository.save(solicitation);
+        elasticsearchIndexService.index(saved);
+        return SolicitationResponse.from(saved);
     }
 
     public SolicitationResponse decide(Long id, Long analystId, DecisionRequest request) {
@@ -70,7 +74,9 @@ public class AnalystService {
         solicitation.setAnalyzedBy(analyst);
         solicitation.setAnalyzedAt(LocalDateTime.now());
 
-        return SolicitationResponse.from(solicitationRepository.save(solicitation));
+        Solicitation saved = solicitationRepository.save(solicitation);
+        elasticsearchIndexService.index(saved);
+        return SolicitationResponse.from(saved);
     }
 
     private Solicitation findWithinCoverage(Long id, Long analystId) {
