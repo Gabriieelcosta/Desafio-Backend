@@ -1,5 +1,6 @@
 package com.solicitations.controller;
 
+import com.solicitations.aop.Audit;
 import com.solicitations.dto.solicitation.SolicitationResponse;
 import com.solicitations.dto.solicitation.Step1Request;
 import com.solicitations.dto.solicitation.Step2Request;
@@ -45,6 +46,7 @@ public class SolicitationController {
         return ResponseEntity.ok(solicitationService.saveStep3(id, currentUserId(), request));
     }
 
+    @Audit(action = "SUBMIT_SOLICITATION")
     @PostMapping("/{id}/submit")
     public ResponseEntity<SolicitationResponse> submit(@PathVariable Long id) {
         return ResponseEntity.ok(solicitationService.submit(id, currentUserId()));
