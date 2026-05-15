@@ -1,5 +1,6 @@
 package com.solicitations.controller;
 
+import com.solicitations.aop.Audit;
 import com.solicitations.dto.admin.AssignCoverageRequest;
 import com.solicitations.dto.admin.CreateUserRequest;
 import com.solicitations.dto.admin.UserResponse;
@@ -19,6 +20,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
+    @Audit(action = "CREATE_USER")
     @PostMapping("/users")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createUser(request));
