@@ -146,6 +146,18 @@ curl "http://localhost:8080/analyst/solicitations/search?q=instalacao&priority=H
 
 ---
 
+## Documentação (Swagger)
+
+Com a aplicação rodando, acesse:
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+Os endpoints estão agrupados por **Solicitações**, **Analista** e **Admin**. Para testar autenticado, clique em **Authorize** e informe o token no formato `Bearer {token}`.
+
+---
+
 ## Regras importantes
 
 - Prioridade `HIGH` exige `estimatedValue` >= 100.
