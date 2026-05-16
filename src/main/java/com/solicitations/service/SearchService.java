@@ -1,5 +1,6 @@
 package com.solicitations.service;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
@@ -55,11 +56,12 @@ public class SearchService {
         }
 
         if (params.getStatus() != null && !params.getStatus().isEmpty()) {
+            List<FieldValue> statusValues = params.getStatus().stream()
+                    .map(FieldValue::of)
+                    .toList();
             bool.filter(f -> f.terms(t -> t
                     .field("status")
-                    .terms(tv -> tv.value(params.getStatus().stream()
-                            .map(co.elastic.clients.elasticsearch._types.FieldValue::of)
-                            .toList()))));
+                    .terms(tv -> tv.value(statusValues))));
         }
 
         if (params.getServiceType() != null) {
@@ -74,23 +76,24 @@ public class SearchService {
                 : (params.getState() != null ? List.of(params.getState()) : null);
 
         if (stateFilter != null && !stateFilter.isEmpty()) {
+            List<FieldValue> stateValues = stateFilter.stream()
+                    .map(FieldValue::of)
+                    .toList();
             bool.filter(f -> f.terms(t -> t
                     .field("state")
-                    .terms(tv -> tv.value(stateFilter.stream()
-                            .map(co.elastic.clients.elasticsearch._types.FieldValue::of)
-                            .toList()))));
+                    .terms(tv -> tv.value(stateValues))));
         }
 
         if (params.getDateFrom() != null) {
+            String from = params.getDateFrom().toString();
             bool.filter(f -> f.range(r -> r
-                    .field("submittedAt")
-                    .gte(JsonData.of(params.getDateFrom().toString()))));
+                    .untyped(u -> u.field("submittedAt").gte(JsonData.of(from)))));
         }
 
         if (params.getDateTo() != null) {
+            String to = params.getDateTo().toString();
             bool.filter(f -> f.range(r -> r
-                    .field("submittedAt")
-                    .lte(JsonData.of(params.getDateTo().toString()))));
+                    .untyped(u -> u.field("submittedAt").lte(JsonData.of(to)))));
         }
 
         return Query.of(q -> q.bool(bool.build()));

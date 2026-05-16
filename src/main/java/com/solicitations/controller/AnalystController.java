@@ -1,5 +1,6 @@
 package com.solicitations.controller;
 
+import com.solicitations.aop.Audit;
 import com.solicitations.dto.analyst.DecisionRequest;
 import com.solicitations.dto.search.PagedResponse;
 import com.solicitations.dto.search.SolicitationSearchParams;
@@ -46,6 +47,7 @@ public class AnalystController {
         return ResponseEntity.ok(analystService.startReview(id, currentUserId()));
     }
 
+    @Audit(action = "DECIDE_SOLICITATION")
     @PostMapping("/{id}/decide")
     public ResponseEntity<SolicitationResponse> decide(@PathVariable Long id,
                                                        @Valid @RequestBody DecisionRequest request) {
