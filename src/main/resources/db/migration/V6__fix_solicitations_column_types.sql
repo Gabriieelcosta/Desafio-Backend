@@ -1,0 +1,2 @@
+ALTER TABLE solicitations ALTER COLUMN current_step TYPE INTEGER;
+ALTER TABLE solicitations ALTER COLUMN state TYPE VARCHAR(2);

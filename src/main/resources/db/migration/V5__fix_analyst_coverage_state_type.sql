@@ -1,0 +1,1 @@
+ALTER TABLE analyst_coverage ALTER COLUMN state TYPE VARCHAR(2);
