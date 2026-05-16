@@ -30,6 +30,7 @@ public class SolicitationService {
     private final SolicitationRepository solicitationRepository;
     private final UserRepository userRepository;
     private final ViaCepClient viaCepClient;
+    private final ElasticsearchIndexService elasticsearchIndexService;
 
     public SolicitationResponse create(Long clientId) {
         User client = userRepository.findById(clientId)
@@ -38,7 +39,9 @@ public class SolicitationService {
         Solicitation solicitation = new Solicitation();
         solicitation.setClient(client);
 
-        return SolicitationResponse.from(solicitationRepository.save(solicitation));
+        Solicitation saved = solicitationRepository.save(solicitation);
+        elasticsearchIndexService.index(saved);
+        return SolicitationResponse.from(saved);
     }
 
     public SolicitationResponse saveStep1(Long id, Long clientId, Step1Request request) {
@@ -52,7 +55,9 @@ public class SolicitationService {
             solicitation.setCurrentStep(1);
         }
 
-        return SolicitationResponse.from(solicitationRepository.save(solicitation));
+        Solicitation saved = solicitationRepository.save(solicitation);
+        elasticsearchIndexService.index(saved);
+        return SolicitationResponse.from(saved);
     }
 
     public SolicitationResponse saveStep2(Long id, Long clientId, Step2Request request) {
@@ -63,7 +68,6 @@ public class SolicitationService {
         }
 
         String normalizedCep = request.getCep().replaceAll("[^0-9]", "");
-
         ViaCepResponse address = viaCepClient.fetch(normalizedCep);
 
         solicitation.setCep(normalizedCep);
@@ -78,7 +82,9 @@ public class SolicitationService {
             solicitation.setCurrentStep(2);
         }
 
-        return SolicitationResponse.from(solicitationRepository.save(solicitation));
+        Solicitation saved = solicitationRepository.save(solicitation);
+        elasticsearchIndexService.index(saved);
+        return SolicitationResponse.from(saved);
     }
 
     public SolicitationResponse saveStep3(Long id, Long clientId, Step3Request request) {
@@ -107,7 +113,9 @@ public class SolicitationService {
         solicitation.setTermsAccepted(request.getTermsAccepted());
         solicitation.setCurrentStep(3);
 
-        return SolicitationResponse.from(solicitationRepository.save(solicitation));
+        Solicitation saved = solicitationRepository.save(solicitation);
+        elasticsearchIndexService.index(saved);
+        return SolicitationResponse.from(saved);
     }
 
     public SolicitationResponse submit(Long id, Long clientId) {
@@ -118,7 +126,9 @@ public class SolicitationService {
         solicitation.setStatus(SolicitationStatus.SUBMITTED);
         solicitation.setSubmittedAt(LocalDateTime.now());
 
-        return SolicitationResponse.from(solicitationRepository.save(solicitation));
+        Solicitation saved = solicitationRepository.save(solicitation);
+        elasticsearchIndexService.index(saved);
+        return SolicitationResponse.from(saved);
     }
 
     public SolicitationResponse getById(Long id, Long clientId) {
